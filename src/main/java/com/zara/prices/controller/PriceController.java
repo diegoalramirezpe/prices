@@ -29,7 +29,7 @@ public class PriceController {
                 productId, brandId, applicationDate);
         LocalDateTime date = LocalDateTime.parse(applicationDate, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         PriceResponse response = priceService.getPrice(productId, brandId, date);
-        System.out.println("Respuesta del controlador: " + response);
+        log.info("Respuesta del controlador: {}", response);
         return response;
     }
 

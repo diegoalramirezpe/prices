@@ -21,6 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -36,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = PriceController.class)
 @AutoConfigureMockMvc
-@ContextConfiguration(locations = "/test-context.xml")
 class PriceControllerTest {
 
     @Autowired
@@ -48,30 +50,39 @@ class PriceControllerTest {
     @MockBean
     private PriceController priceController;
 
-    @Mock
+    @MockBean
     private PriceService priceService;
 
-    @Mock
+    @MockBean
     private PriceResponseMapper priceResponseMapper;
 
-    @Mock
+    @MockBean
     private PriceRepository priceRepository;
 
-    @MockBean
-    private DataInitializer dataInitializer;
+    @Autowired
+    private WebApplicationContext context;
+
+    @BeforeEach
+    public void setup() {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .alwaysDo(MockMvcResultHandlers.print())
+                .build();
+    }
 
     @Test
-    void testGetPriceAt10AM() throws Exception {
+    void testAt10AMOnJune14() throws Exception {
         // Mocking the service response
         when(priceService.getPrice(1L,35455L, LocalDateTime.parse("2020-06-14T10:00:00",DateTimeFormatter.ISO_DATE_TIME)))
-                .thenReturn(PriceResponseMock.caseOnePriceResponse());
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(35.5));
 
         when(priceResponseMapper.toResponse(any(Price.class),any(LocalDateTime.class)))
-                .thenReturn(PriceResponseMock.caseOnePriceResponse());
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(35.5));
         when(priceRepository.findByBrandIdAndProductIdAndStartDateBeforeAndEndDateAfterOrderByPriorityDesc(1L,
                 35455L,
                 LocalDateTime.parse("2020-06-14T10:00:00",DateTimeFormatter.ISO_DATE_TIME),
                 LocalDateTime.parse("2020-06-14T10:00:00",DateTimeFormatter.ISO_DATE_TIME))).thenReturn(PriceMock.anPriceList());
+
 
         // Performing the request and asserting the response
         mockMvc.perform(get("/price")
@@ -80,6 +91,98 @@ class PriceControllerTest {
                         .param("brandId", "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.price").value(35.50));
+                .andExpect(jsonPath("$.price").value(35.5));
+    }
+
+    @Test
+    void testAt4PMOnJune14() throws Exception {
+        // Mocking the service response
+        when(priceService.getPrice(1L,35455L, LocalDateTime.parse("2020-06-14T16:00:00",DateTimeFormatter.ISO_DATE_TIME)))
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(25.45));
+
+        when(priceResponseMapper.toResponse(any(Price.class),any(LocalDateTime.class)))
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(25.45));
+        when(priceRepository.findByBrandIdAndProductIdAndStartDateBeforeAndEndDateAfterOrderByPriorityDesc(1L,
+                35455L,
+                LocalDateTime.parse("2020-06-14T16:00:00",DateTimeFormatter.ISO_DATE_TIME),
+                LocalDateTime.parse("2020-06-14T16:00:00",DateTimeFormatter.ISO_DATE_TIME))).thenReturn(PriceMock.anPriceList());
+
+        // Performing the request and asserting the response
+        mockMvc.perform(get("/price")
+                        .param("applicationDate", "2020-06-14T16:00:00")
+                        .param("productId", "35455")
+                        .param("brandId", "1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price").value(25.45));
+    }
+
+    @Test
+    void testAt9PMOnJune14() throws Exception {
+        // Mocking the service response
+        when(priceService.getPrice(1L,35455L, LocalDateTime.parse("2020-06-14T21:00:00",DateTimeFormatter.ISO_DATE_TIME)))
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(35.5));
+
+        when(priceResponseMapper.toResponse(any(Price.class),any(LocalDateTime.class)))
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(35.5));
+        when(priceRepository.findByBrandIdAndProductIdAndStartDateBeforeAndEndDateAfterOrderByPriorityDesc(1L,
+                35455L,
+                LocalDateTime.parse("2020-06-14T21:00:00",DateTimeFormatter.ISO_DATE_TIME),
+                LocalDateTime.parse("2020-06-14T21:00:00",DateTimeFormatter.ISO_DATE_TIME))).thenReturn(PriceMock.anPriceList());
+
+        // Performing the request and asserting the response
+        mockMvc.perform(get("/price")
+                        .param("applicationDate", "2020-06-14T21:00:00")
+                        .param("productId", "35455")
+                        .param("brandId", "1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price").value(35.5));
+    }
+
+    @Test
+    void testAt10AMOnJune15() throws Exception {
+        // Mocking the service response
+        when(priceService.getPrice(1L,35455L, LocalDateTime.parse("2020-06-15T10:00:00",DateTimeFormatter.ISO_DATE_TIME)))
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(30.5));
+
+        when(priceResponseMapper.toResponse(any(Price.class),any(LocalDateTime.class)))
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(30.5));
+        when(priceRepository.findByBrandIdAndProductIdAndStartDateBeforeAndEndDateAfterOrderByPriorityDesc(1L,
+                35455L,
+                LocalDateTime.parse("2020-06-15T10:00:00",DateTimeFormatter.ISO_DATE_TIME),
+                LocalDateTime.parse("2020-06-15T10:00:00",DateTimeFormatter.ISO_DATE_TIME))).thenReturn(PriceMock.anPriceList());
+
+        // Performing the request and asserting the response
+        mockMvc.perform(get("/price")
+                        .param("applicationDate", "2020-06-15T10:00:00")
+                        .param("productId", "35455")
+                        .param("brandId", "1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price").value(30.5));
+    }
+
+    @Test
+    void testAt9PMOnJune16() throws Exception {
+        // Mocking the service response
+        when(priceService.getPrice(1L,35455L, LocalDateTime.parse("2020-06-16T21:00:00",DateTimeFormatter.ISO_DATE_TIME)))
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(38.95));
+
+        when(priceResponseMapper.toResponse(any(Price.class),any(LocalDateTime.class)))
+                .thenReturn(PriceResponseMock.caseOnePriceResponse(38.95));
+        when(priceRepository.findByBrandIdAndProductIdAndStartDateBeforeAndEndDateAfterOrderByPriorityDesc(1L,
+                35455L,
+                LocalDateTime.parse("2020-06-16T21:00:00",DateTimeFormatter.ISO_DATE_TIME),
+                LocalDateTime.parse("2020-06-16T21:00:00",DateTimeFormatter.ISO_DATE_TIME))).thenReturn(PriceMock.anPriceList());
+
+        // Performing the request and asserting the response
+        mockMvc.perform(get("/price")
+                        .param("applicationDate", "2020-06-16T21:00:00")
+                        .param("productId", "35455")
+                        .param("brandId", "1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price").value(38.95));
     }
 }
