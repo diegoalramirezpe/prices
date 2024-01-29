@@ -2,10 +2,8 @@ package com.zara.prices.controller;
 
 import com.zara.prices.model.Price;
 import com.zara.prices.model.PriceResponse;
-import com.zara.prices.repository.PriceRepository;
 import com.zara.prices.service.PriceService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -19,11 +17,13 @@ import java.util.List;
 @Slf4j
 public class PriceController {
 
-    @Autowired
-    private PriceService priceService;
+    private final PriceService priceService;
+
+    public PriceController(PriceService priceService) {
+        this.priceService = priceService;
+    }
 
     @GetMapping("/price")
-    @ResponseBody
     public PriceResponse getPrice(@RequestParam Long productId, @RequestParam Long brandId, @RequestParam String applicationDate) {
         log.info("Comienza la ejecucion del controlador para obtener el precio segun el productId {}, brandId {}, y applicationDate{}",
                 productId, brandId, applicationDate);
